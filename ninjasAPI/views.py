@@ -38,6 +38,7 @@ class Products(generics.ListCreateAPIView):
 # example order details = >http://127.0.0.1:8000/order/12/
 class OrderDetails(APIView):
     permission_classes = (IsAuthenticated,)
+
     # total & prices calculated in PLN
     @classmethod
     def order_info(cls, id):
@@ -75,6 +76,7 @@ class OrderDetails(APIView):
 
 class AllOrders(APIView):
     permission_classes = (IsAuthenticated,)
+
     def get(self, request):
         results = []
         orders = SalesOrder.objects.all()
@@ -104,6 +106,7 @@ class AllOrders(APIView):
 
 class CreateNewOrder(APIView):
     permission_classes = (IsAuthenticated,)
+
     def post(self, request):
         data = request.data
         order_items = request.data.get('order')
@@ -123,11 +126,13 @@ class CreateNewOrder(APIView):
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
+
 # all user likes
 class UsersWishList(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
     queryset = WishList.objects.all()
     serializer_class = UsersWishListSerializer
+
 
 # likes per specific user (by user_id)
 class UserWishList(generics.ListAPIView):
@@ -140,23 +145,23 @@ class UserWishList(generics.ListAPIView):
             queryset = WishList.objects.filter(customer_id=user_id)
             return queryset
 
+
 # login to access api http://127.0.0.1:8000/login/
 # {"username" : "user2",
 # "password" : "1234"}
 
 class LoginView(APIView):
     permission_classes = (permissions.AllowAny,)
-    queryset = User.objects.all()
 
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
+        usr = authenticate(username=username, password=password)
+        if usr is not None:
+            login(request, usr)
             serializer = TokenSerializer(data={
                 "token": jwt_encode_handler(
-                    jwt_payload_handler(user)
+                    jwt_payload_handler(usr)
                 )})
             serializer.is_valid()
             return Response(serializer.data)
