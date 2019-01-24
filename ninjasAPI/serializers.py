@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from ninjasAPI.models import Product, ProductCategory, CURRENCY, SalesOrder, SalesOrderItem, Delivery
+from ninjasAPI.models import Product, ProductCategory, CURRENCY, SalesOrder, SalesOrderItem, Delivery, WishList
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -56,3 +56,18 @@ class OrderItemSerialiser(serializers.Serializer):
     class Meta:
         model = SalesOrderItem
         fields = 'product, quantity'
+
+
+class UsersWishListSerializer(serializers.ModelSerializer):
+    customer = serializers.SlugRelatedField(many=False, slug_field='username',
+                                            queryset=User.objects.all())
+    product = serializers.SlugRelatedField(many=False, slug_field='title',
+                                           queryset=Product.objects.all())
+
+    class Meta:
+        model = WishList
+        fields = ("customer", "product")
+
+
+class TokenSerializer(serializers.Serializer):
+    token = serializers.CharField(max_length=255)

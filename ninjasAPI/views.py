@@ -1,17 +1,25 @@
 from rest_framework import generics, status
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
-from ninjasAPI.models import Product, SalesOrder, SalesOrderItem, Currency_Rates
+from ninjasAPI.models import Product, SalesOrder, SalesOrderItem, Currency_Rates, WishList
 from ninjasAPI.serializers import ProductSerializer, NewOrderSerialiser, NewOrderItemSerialiser, OrderSerialiser, \
-    OrderItemSerialiser
+    OrderItemSerialiser, UsersWishListSerializer, TokenSerializer
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
+from rest_framework_jwt.settings import api_settings
+from rest_framework import permissions
+
+jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
 
 class Products(generics.ListCreateAPIView):
-    queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = (IsAuthenticated,)
 
-    # paginantion http://127.0.0.1:8000/products/?offset=10  => global setting for 10 items
+    # paginantion "http://127.0.0.1:8000/products/?page=2"  => global setting for 10 items
 
     # filtering by title => np: http://127.0.0.1:8000/products/?ProductTitle=a
     # filtering by category => /products/?category=8  (category number)
@@ -29,6 +37,7 @@ class Products(generics.ListCreateAPIView):
 
 # example order details = >http://127.0.0.1:8000/order/12/
 class OrderDetails(APIView):
+    permission_classes = (IsAuthenticated,)
     # total & prices calculated in PLN
     @classmethod
     def order_info(cls, id):
@@ -63,6 +72,21 @@ class OrderDetails(APIView):
     def get(self, request, id):
         return Response(OrderDetails.order_info(id))
 
+
+class AllOrders(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self, request):
+        results = []
+        orders = SalesOrder.objects.all()
+        for order in orders:
+            results.append(OrderDetails.order_info(order.id))
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
+        paginator.display_page_controls = True
+        result_page = paginator.paginate_queryset(results, request)
+        return paginator.get_paginated_response(result_page)
+
+
 # sample order => http://127.0.0.1:8000/neworder/
 # {
 # 	"customer": 11,
@@ -79,6 +103,7 @@ class OrderDetails(APIView):
 # }
 
 class CreateNewOrder(APIView):
+    permission_classes = (IsAuthenticated,)
     def post(self, request):
         data = request.data
         order_items = request.data.get('order')
@@ -97,3 +122,42 @@ class CreateNewOrder(APIView):
             return Response(OrderDetails.order_info(order_id), status=status.HTTP_201_CREATED)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+# all user likes
+class UsersWishList(generics.ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = WishList.objects.all()
+    serializer_class = UsersWishListSerializer
+
+# likes per specific user (by user_id)
+class UserWishList(generics.ListAPIView):
+    serializer_class = UsersWishListSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        user_id = self.kwargs['id']
+        if user_id is not None:
+            queryset = WishList.objects.filter(customer_id=user_id)
+            return queryset
+
+# login to access api http://127.0.0.1:8000/login/
+# {"username" : "user2",
+# "password" : "1234"}
+
+class LoginView(APIView):
+    permission_classes = (permissions.AllowAny,)
+    queryset = User.objects.all()
+
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            serializer = TokenSerializer(data={
+                "token": jwt_encode_handler(
+                    jwt_payload_handler(user)
+                )})
+            serializer.is_valid()
+            return Response(serializer.data)
+        return Response(status=status.HTTP_401_UNAUTHORIZED)

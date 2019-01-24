@@ -9,6 +9,7 @@ CURRENCY = (
     (4, "GBP"),
 )
 
+
 # You probably need some more information about customers and extension of the User model (address etc.) , I'm gonna skip that as it wasn't
 # specified in the excercise description
 
@@ -31,6 +32,7 @@ class Product(models.Model):
     currency = models.IntegerField(choices=CURRENCY, default=1)
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, verbose_name="product_category")
     picture = models.ImageField(null=True)
+
     def __str__(self):
         return "%s" % (self.title)
 
@@ -55,3 +57,8 @@ class SalesOrderItem(models.Model):
     sales_order_number = models.ForeignKey(SalesOrder, on_delete=models.CASCADE, verbose_name="order_number")
     product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="product")
     quantity = models.IntegerField()
+
+
+class WishList(models.Model):
+    customer = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="customer")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="wanted_product")

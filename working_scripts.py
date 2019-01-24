@@ -1,11 +1,11 @@
 import random
 from django.contrib.auth.models import User
 from faker import Faker
-from ninjasAPI.models import ProductCategory, Product, Delivery, SalesOrder, SalesOrderItem
+from ninjasAPI.models import ProductCategory, Product, Delivery, SalesOrder, SalesOrderItem, WishList
 
 fake = Faker('pl_PL')
 
-# Generate 20 fake users
+Generate 20 fake users
 username_base = "user"
 
 for x in range(1, 21):
@@ -41,7 +41,7 @@ for cat in all_categories:
         product.price = random.randint(1, 100) + (random.randint(1, 100)/100)
         product.currency = random.randint(1, 4)
         product.category_id = cat.id
-        product.picture = "prod_pic_" + str(cat.id) + "_" + str(x) + ".jpg"
+        product.picture = "prod_pic_1_" + str(x) + ".jpg"
         product.save()
 
 # Generate random delivery options, 5 fixed and 5 %-based
@@ -79,5 +79,14 @@ for ord in orders:
         order_item.product_id = random_product
         order_item.sales_order_number_id = ord.id
         order_item.save()
+
+# populate 5 likes / whished per customer
+
+users = User.objects.all()
+for usr in users:
+    for x in range(1,6):
+        random_product_id = random.randint(1, 100)
+        WishList.objects.create(customer_id=usr.id, product_id=random_product_id)
+
 
 # python3 manage.py shell < working_scripts.py
