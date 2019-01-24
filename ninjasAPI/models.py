@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 from django.db import models
 from django.utils.timezone import now
 
@@ -10,7 +10,7 @@ CURRENCY = (
 )
 
 # You probably need some more information about customers and extension of the User model (address etc.) , I'm gonna skip that as it wasn't
-#specified in the excercise description
+# specified in the excercise description
 
 class Currency_Rates(models.Model):
     currency = models.IntegerField(choices=CURRENCY, default=1)
@@ -20,6 +20,9 @@ class Currency_Rates(models.Model):
 class ProductCategory(models.Model):
     product_category = models.CharField(max_length=64, unique=True)
 
+    def __str__(self):
+        return "%s" % (self.product_category)
+
 
 class Product(models.Model):
     title = models.CharField(max_length=64)
@@ -28,12 +31,18 @@ class Product(models.Model):
     currency = models.IntegerField(choices=CURRENCY, default=1)
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, verbose_name="product_category")
     picture = models.ImageField(null=True)
+    def __str__(self):
+        return "%s" % (self.title)
 
 
 class Delivery(models.Model):
     title = models.CharField(max_length=128)
     fixed_price_delivery = models.FloatField(null=True)
     percentage_delivery_price = models.FloatField(null=True)
+
+    def __str__(self):
+        return "%s" % (self.title)
+
 
 # for simplification - SalesOrder.id to sales order number
 class SalesOrder(models.Model):
@@ -46,4 +55,3 @@ class SalesOrderItem(models.Model):
     sales_order_number = models.ForeignKey(SalesOrder, on_delete=models.CASCADE, verbose_name="order_number")
     product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="product")
     quantity = models.IntegerField()
-
