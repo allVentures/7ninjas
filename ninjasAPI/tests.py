@@ -1,11 +1,9 @@
 import json
 import random
-
 from django.contrib.auth.models import User
 from django.urls import reverse
 from faker import Faker
 from rest_framework.test import APITestCase
-
 from ninjasAPI.models import ProductCategory, Product
 
 
@@ -129,5 +127,10 @@ class ApiTest(APITestCase):
         url = reverse("products")
         response = self.client.get(url, HTTP_AUTHORIZATION=auth)
         self.assertEqual(response.status_code, 200)
+        # authenticate with token (wrong token)
+        token = "xxxxxxxxxxxx"
+        auth = 'JWT ' + token
+        response = self.client.get(url, HTTP_AUTHORIZATION=auth)
+        self.assertEqual(response.status_code, 401)
 
 # Im going to stop writing tests here, if needed I may finish that. I think this is enough for the sake of this coding challange

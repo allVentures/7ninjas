@@ -21,16 +21,24 @@ class Currency_Rates(models.Model):
 class ProductCategory(models.Model):
     product_category = models.CharField(max_length=64, unique=True)
 
+    class Meta:
+        verbose_name = 'Product Category'
+        verbose_name_plural = 'Product Categories'
+
     def __str__(self):
         return "%s" % (self.product_category)
 
+    def product_count(self):
+        product_count = Product.objects.filter(category_id=self.id).count()
+        return product_count
+
 
 class Product(models.Model):
-    title = models.CharField(max_length=64)
+    title = models.CharField(max_length=64, verbose_name="Product Name")
     description = models.TextField(max_length=512, null=True)
     price = models.FloatField()
     currency = models.IntegerField(choices=CURRENCY, default=1)
-    category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, verbose_name="product_category")
+    category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE, verbose_name="Product Category")
     picture = models.ImageField(null=True)
 
     def __str__(self):
@@ -50,13 +58,27 @@ class Delivery(models.Model):
 class SalesOrder(models.Model):
     customer = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="customer")
     delivery = models.ForeignKey(Delivery, on_delete=models.CASCADE, verbose_name="delivery")
-    order_date = models.DateTimeField(editable=False, default=now)
+    order_date = models.DateTimeField(editable=False, default=now, verbose_name="order date")
+
+    class Meta:
+        verbose_name = 'Order'
+        verbose_name_plural = 'Orders'
+
+    def __str__(self):
+        return "%s" % (self.id)
 
 
 class SalesOrderItem(models.Model):
     sales_order_number = models.ForeignKey(SalesOrder, on_delete=models.CASCADE, verbose_name="order_number")
     product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="product")
     quantity = models.IntegerField()
+
+    class Meta:
+        verbose_name = 'Item'
+        verbose_name_plural = 'Items'
+
+    def __str__(self):
+        return "%s" % (self.product.title)
 
 
 class WishList(models.Model):
