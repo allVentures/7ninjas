@@ -1,0 +1,77 @@
+1) create virtual env and activate it
+
+2) download repositoty to from github:
+git clone https://github.com/allVentures/7ninjas.git
+(this repository doesnt contains pictures!, so I would encourage you to use the code in the zip attached)
+
+3) install requirments:
+pip3 install -r requirements.txt
+
+4) create postgreSQL database:
+SQL: create database ninjas;
+
+5) apply migrations:
+python3 manage.py migrate
+(skip this step if you are going to upload database dump!)
+
+6) (optional) upload database dump
+psql -U [user_name] -W -f milodump.sql -h 127.0.0.1  milo
+
+6) start application
+python3 manage.py runserver
+
+7) endpoints & links:
+    admin:
+    http://127.0.0.1:8000/admin/
+    (login: admin, pswd: 1234)
+
+    api login:
+    http://127.0.0.1:8000/login/
+    {"username" : "user2",
+    "password" : "1234"}
+
+    get token:
+    http://127.0.0.1:8000/api-token-auth/
+    {"username" : "user2",
+    "password" : "1234"}
+
+    verify token:
+    http://127.0.0.1:8000/api-token-verify/
+
+    refresh token:
+    http://127.0.0.1:8000/api-token-refresh/
+
+    all products:
+    http://127.0.0.1:8000/products/
+
+    order details (id):
+    http://127.0.0.1:8000/order/4/
+
+    create new order:
+    http://127.0.0.1:8000/neworder/
+    (example):
+    {
+        "customer": 11,
+        "delivery": 1,
+        "order": [{
+                "product": 1,
+                "quantity": 11
+            },
+            {
+                "product": 4,
+                "quantity": 15
+            }
+        ]
+    }
+
+    all orders:
+    http://127.0.0.1:8000/order/
+
+    Users Wish List:
+    http://127.0.0.1:8000/wishlist/
+
+    User Wish List (id):
+    http://127.0.0.1:8000/wishlist/4/
+
+8) tests:
+python3 manage.py test
