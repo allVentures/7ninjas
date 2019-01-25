@@ -88,5 +88,7 @@ for usr in users:
         random_product_id = random.randint(1, 100)
         WishList.objects.create(customer_id=usr.id, product_id=random_product_id)
 
+# Superuser to manage admin
+User.objects.create_superuser(username="admin", password="1234", email="test@email.com")
 
 # python3 manage.py shell < working_scripts.py
