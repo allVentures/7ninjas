@@ -9,7 +9,7 @@ djangorestframework-simplejwt==3.3
 Faker==1.0.2
 idna==2.8
 jet-django==0.4.5
-Pillow==5.4.1
+Pillow==8.1.1
 psycopg2==2.7.7
 psycopg2-binary==2.7.7
 PyJWT==1.7.1
